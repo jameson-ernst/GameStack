@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{6AC3F98E-32FE-4257-9227-8B0EEF660C91}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Match3.Desktop</RootNamespace>
+    <AssemblyName>Match3.Desktop</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="BeforeBuild" command="mono ../../bin/import.exe ../content/ ../assets/" workingdir="${ProjectDir}" />
+        <Command type="AfterBuild" command="cp -f ../../external/desktop/liblodepng.so ${TargetDir}" workingdir="${ProjectDir}" />
+        <Command type="AfterBuild" command="cp -f ../../external/desktop/liblodepng.dylib ${TargetDir}" workingdir="${ProjectDir}" />
+        <Command type="AfterBuild" command="cp -f ../../external/desktop/SDL2#.dll.config ${TargetDir}" workingdir="${ProjectDir}" />
+        <Command type="AfterBuild" command="cp -f ../../external/desktop/GameStack.Desktop.Bindings.dll.config ${TargetDir}" workingdir="${ProjectDir}" />
+      </CustomCommands>
+    </CustomCommands>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;__DESKTOP__</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <EnvironmentVariables>
+      <EnvironmentVariables>
+        <Variable name="DYLD_LIBRARY_PATH" value="/usr/local/lib/libSDL2" />
+      </EnvironmentVariables>
+    </EnvironmentVariables>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Externalconsole>true</Externalconsole>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="SDL2#">
+      <HintPath>..\..\external\desktop\SDL2#.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="GameStack.Desktop">
+      <HintPath>..\..\lib\GameStack.Desktop.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="..\Match3.iOS\Game.cs">
+      <Link>Game.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Folder Include="assets\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\assets\1-up.sfx">
+      <Link>assets\1-up.sfx</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\assets\coin.sfx">
+      <Link>assets\coin.sfx</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\assets\game-over.mp3">
+      <Link>assets\game-over.mp3</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\assets\jump.sfx">
+      <Link>assets\jump.sfx</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\assets\landing.sfx">
+      <Link>assets\landing.sfx</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\assets\mario.atlas">
+      <Link>assets\mario.atlas</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\assets\mario.mp3">
+      <Link>assets\mario.mp3</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\assets\match.sfx">
+      <Link>assets\match.sfx</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\assets\no-match.sfx">
+      <Link>assets\no-match.sfx</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>
