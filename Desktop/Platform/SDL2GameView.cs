@@ -25,6 +25,7 @@ namespace GameStack.Desktop {
 
 		public event EventHandler<FrameArgs> Update;
 		public event EventHandler<FrameArgs> Render;
+		public event EventHandler<SDL2EventArgs> Event;
 		public event EventHandler Destroyed;
 
 		public SDL2GameView (string title, int width, int height, bool fullscreen = false, bool vsync = true, 
@@ -40,15 +41,13 @@ namespace GameStack.Desktop {
 
 			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 2);
-			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_PROFILE_MASK, (int)SDL.SDL_GLprofile.SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_PROFILE_MASK, (int)SDL.SDL_GLprofile.SDL_GL_CONTEXT_PROFILE_CORE);
 			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_RED_SIZE, 8);
 			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_GREEN_SIZE, 8);
 			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_BLUE_SIZE, 8);
 			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_DEPTH_SIZE, 24);
 			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_MULTISAMPLEBUFFERS, 1);
 			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_MULTISAMPLESAMPLES, 4);
-			if(vsync)
-				SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_DOUBLEBUFFER, 1);
 
 			_window = SDL.SDL_CreateWindow(
 				title,
@@ -85,7 +84,7 @@ namespace GameStack.Desktop {
 
 		void ThreadProc () {
 			InitGLContext();
-			UpdateLoop();
+			ThreadLoop();
 		}
 
 		void InitGLContext () {
@@ -109,7 +108,7 @@ namespace GameStack.Desktop {
 		}
 
 		// Runs on worker thread
-		void UpdateLoop () {
+		void ThreadLoop () {
 			long freq = Stopwatch.Frequency;
 			long time = Stopwatch.GetTimestamp();
 			long acc = 0;
@@ -154,7 +153,51 @@ namespace GameStack.Desktop {
 			_sdlEvents.Enqueue(e);
 		}
 
+		// Runs GameView loop on main thread instead.
+		public void EnterLoop () {
+			InitGLContext();
+			SDL.SDL_GL_MakeCurrent(_window, _glContext);
+			ThreadContext.Current.GLContext = _glContext;
+
+			long freq = Stopwatch.Frequency;
+			long time = Stopwatch.GetTimestamp();
+			long acc = 0;
+			long frameTime = freq / 60;
+			float frameSeconds = frameTime / (float)freq;
+
+			while (!_isDisposed) {
+				SDL.SDL_Event e;
+				while (!_isDisposed && SDL.SDL_PollEvent(out e) == 1) {
+					ProcessEvent(e);
+				}
+
+				if (!_isDisposed) {
+					var delta = Stopwatch.GetTimestamp() - time;
+					time += delta;
+					acc += delta;
+					bool updated = false;
+					while (acc >= frameTime) {
+						OnUpdate(frameSeconds);
+						acc -= frameTime;
+						updated = true;
+					}
+
+					if (updated) {
+						if (Render != null)
+							Render(this, _frameArgs);
+						SDL.SDL_GL_SwapWindow(_window);
+					}
+
+//					if (acc < frameTime / 2)
+//						Thread.Sleep((int)(frameSeconds / 2 * 1000));
+				}
+			}
+		}
+		
 		void ProcessEvent (SDL.SDL_Event e) {
+			if (Event != null)
+				Event(this, new SDL2EventArgs(e));
+			
 			switch (e.type) {
 				case SDL.SDL_EventType.SDL_QUIT:
 					this.CloseWindow();
@@ -252,8 +295,12 @@ namespace GameStack.Desktop {
 					windowEvent = SDL.SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE,
 				}
 			};
-			EnqueueEvent(e);
-			Join();
+			
+			if (_thread != null) {
+				EnqueueEvent(e);
+				Join();
+			} else
+				SDL.SDL_PushEvent(ref e);
 		}
 
 		void CloseWindow () {
