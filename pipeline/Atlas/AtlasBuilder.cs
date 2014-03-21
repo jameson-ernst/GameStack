@@ -10,14 +10,14 @@ using Newtonsoft.Json.Linq;
 
 namespace GameStack.Pipeline.Atlas
 {
-    public class SpriteBuilder
+    public class AtlasBuilder
     {
         private Dictionary<int, Image> images;
         private Dictionary<int, string> spriteNames;
         private Dictionary<int, JObject> metadata;
         private LayoutProperties layoutProp;
 
-        public SpriteBuilder(LayoutProperties _layoutProp)
+        public AtlasBuilder(LayoutProperties _layoutProp)
         {
             images = new Dictionary<int, Image>();
 			spriteNames = new Dictionary<int, string>();
