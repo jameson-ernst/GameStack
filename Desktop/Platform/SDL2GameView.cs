@@ -21,6 +21,7 @@ namespace GameStack.Desktop {
 		IntPtr _glContext;
 		FrameArgs _frameArgs;
 		uint _windowId;
+		bool _loadFrame;
 		volatile bool _isDisposed;
 
 		public event EventHandler<FrameArgs> Update;
@@ -126,14 +127,24 @@ namespace GameStack.Desktop {
 				}
 
 				if (!_isDisposed) {
-					var delta = Stopwatch.GetTimestamp() - time;
-					time += delta;
-					acc += delta;
+					if (_loadFrame) {
+						time = Stopwatch.GetTimestamp();
+						acc = frameTime;
+						_loadFrame = false;
+					} else {
+						var delta = Stopwatch.GetTimestamp() - time;
+						time += delta;
+						acc += delta;
+					}
+					
 					bool updated = false;
 					while (acc >= frameTime) {
 						OnUpdate(frameSeconds);
-						acc -= frameTime;
 						updated = true;
+						acc -= frameTime;
+						
+						if (_loadFrame)
+							acc = 0;
 					}
 
 					if (updated) {
@@ -147,6 +158,11 @@ namespace GameStack.Desktop {
 				}
 			}
 		}
+		
+		public void LoadFrame () {
+			_loadFrame = true;
+		}
+		
 
 		// Called by main thread
 		public void EnqueueEvent (SDL.SDL_Event e) {
@@ -172,14 +188,24 @@ namespace GameStack.Desktop {
 				}
 
 				if (!_isDisposed) {
-					var delta = Stopwatch.GetTimestamp() - time;
-					time += delta;
-					acc += delta;
+					if (_loadFrame) {
+						time = Stopwatch.GetTimestamp();
+						acc = frameTime;
+						_loadFrame = false;
+					} else {
+						var delta = Stopwatch.GetTimestamp() - time;
+						time += delta;
+						acc += delta;
+					}
+					
 					bool updated = false;
 					while (acc >= frameTime) {
 						OnUpdate(frameSeconds);
-						acc -= frameTime;
 						updated = true;
+						acc -= frameTime;
+						
+						if (_loadFrame)
+							acc = 0;
 					}
 
 					if (updated) {
