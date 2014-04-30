@@ -220,6 +220,12 @@ namespace GameStack.Desktop {
 			}
 		}
 		
+		public void RenderNow () {
+			if (Render != null)
+				Render(this, _frameArgs);
+			SDL.SDL_GL_SwapWindow(_window);
+		}
+		
 		void ProcessEvent (SDL.SDL_Event e) {
 			if (Event != null)
 				Event(this, new SDL2EventArgs(e));
@@ -284,7 +290,7 @@ namespace GameStack.Desktop {
 					break;
 			}
 		}
-
+		
 		Vector2 NormalizeToViewport (int x, int y) {
 			return new Vector2(
 				2f * x / _width - 1f,
