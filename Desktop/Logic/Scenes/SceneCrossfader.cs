@@ -35,7 +35,9 @@ namespace GameStack
 			_quad = new Quad(new Vector4(0, 0, e.Size.X, e.Size.Y), Vector4.One);
 			_mat = new SpriteMaterial(new SpriteShader(), null);
 		}
-		
+
+		public Scene Scene { get { return _scene; } }
+
 		public void Init (Scene initialScene)
 		{
 			if (_scene != null)
