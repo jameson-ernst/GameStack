@@ -23,7 +23,7 @@ namespace GameStack.Pipeline {
 
 			string fontFace = "", textureFile = null;
 			int fontSize = 0;
-			float lineHeight = 0f, lineBase = 0f, scaleW = 0f, scaleH = 0f;
+			float lineHeight = 0f, lineBase = 0f, scaleW = 0f, scaleH = 0f, pixelScale = 0f;
 
 			string line;
 			var attrs = new Dictionary<string, string> ();
@@ -67,6 +67,8 @@ namespace GameStack.Pipeline {
 							scaleW = float.Parse (attrs ["scaleW"]);
 						if (attrs.ContainsKey("scaleH"))
 							scaleH = float.Parse (attrs ["scaleH"]);
+						if (attrs.ContainsKey("pixelScale"))
+							pixelScale = float.Parse (attrs ["pixelScale"]);
 						break;
 					case "page":
 						if (textureFile != null)
@@ -105,6 +107,8 @@ namespace GameStack.Pipeline {
 					scaleW = img.Width;
 					scaleH = img.Height;
 				}
+				if (pixelScale == 0f)
+					pixelScale = 1f;
 				
 				var ms = new MemoryStream ();
 				using (var bw = new BinaryWriter(ms)) {
@@ -112,6 +116,7 @@ namespace GameStack.Pipeline {
 					bw.Write(fontSize);
 					bw.Write(lineHeight);
 					bw.Write(lineBase);
+					bw.Write(pixelScale);
 					bw.Write(chars.Count);
 					foreach (var ch in chars) {
 						bw.Write(ch.id);
@@ -119,11 +124,11 @@ namespace GameStack.Pipeline {
 						bw.Write(((ch.y + ch.height) / scaleH));
 						bw.Write((ch.x + ch.width) / scaleW);
 						bw.Write(ch.y / scaleH);
-						bw.Write(ch.width);
-						bw.Write(ch.height);
-						bw.Write(ch.xoffset);
-						bw.Write((lineHeight - ch.height) - ch.yoffset);
-						bw.Write(ch.xadvance);
+						bw.Write(ch.width / pixelScale);
+						bw.Write(ch.height / pixelScale);
+						bw.Write(ch.xoffset / pixelScale);
+						bw.Write(((lineHeight - ch.height) - ch.yoffset) / pixelScale);
+						bw.Write(ch.xadvance / pixelScale);
 					}
 					bw.Write(kernings.Count);
 					foreach (var kvp in kernings) {

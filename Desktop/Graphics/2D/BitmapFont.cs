@@ -77,6 +77,8 @@ namespace GameStack.Graphics {
 		public float LineHeight { get; private set; }
 
 		public float Base { get; private set; }
+		
+		public float PixelScale { get; private set; }
 
 		public float GetKerning (int first, int second) {
 			var combined = ((ulong)(first) << 32) | (ulong)second;
@@ -102,6 +104,7 @@ namespace GameStack.Graphics {
 				this.Size = br.ReadInt32();
 				this.LineHeight = br.ReadSingle();
 				this.Base = br.ReadSingle();
+				this.PixelScale = br.ReadSingle();
 				var count = br.ReadInt32();
 				for (; count > 0; --count) {
 					int id = br.ReadInt32();

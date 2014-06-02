@@ -270,8 +270,10 @@ namespace GameStack {
 				_events = new ConcurrentQueue<EventBase>();
 				_events.Enqueue(new Start(_size, PixelScale));
 			}
-
 			_events.Enqueue(new Resize(_size, PixelScale));
+
+			Assets.PixelScale = PixelScale;
+
 			_threadPaused = true;
 		}
 
