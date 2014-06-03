@@ -114,9 +114,9 @@ namespace GameStack.Pipeline {
 				using (var bw = new BinaryWriter(ms)) {
 					bw.Write(fontFace);
 					bw.Write(fontSize);
-					bw.Write(lineHeight);
-					bw.Write(lineBase);
 					bw.Write(pixelScale);
+					bw.Write(lineHeight / pixelScale);
+					bw.Write(lineBase / pixelScale);
 					bw.Write(chars.Count);
 					foreach (var ch in chars) {
 						bw.Write(ch.id);
@@ -133,7 +133,7 @@ namespace GameStack.Pipeline {
 					bw.Write(kernings.Count);
 					foreach (var kvp in kernings) {
 						bw.Write(kvp.Key);
-						bw.Write(kvp.Value);
+						bw.Write(kvp.Value / pixelScale);
 					}
 					bw.Flush();
 					ms.Position = 0;

@@ -102,9 +102,9 @@ namespace GameStack.Graphics {
 			using (var br = new BinaryReader(s)) {
 				this.Face = br.ReadString();
 				this.Size = br.ReadInt32();
+				this.PixelScale = br.ReadSingle();
 				this.LineHeight = br.ReadSingle();
 				this.Base = br.ReadSingle();
-				this.PixelScale = br.ReadSingle();
 				var count = br.ReadInt32();
 				for (; count > 0; --count) {
 					int id = br.ReadInt32();
